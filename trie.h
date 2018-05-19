@@ -1,19 +1,21 @@
 # include <iostream>
-# include <vector>
+# include <map>
 # include <algorithm>
 # include <string>
-# include <cmath>
 using namespace std;
 
 
 
 class trie
 {
-    struct prefix_data
+
+private:
+	struct prefix_data
     {
         string nexthop;
         string prefix;
     };
+
    	struct node
 	{
 		prefix_data* data;
@@ -26,11 +28,22 @@ class trie
 			child[1]=NULL; 
 		}
 	};
+
 	node* head;
+	map<int, node*> lentable[32];
+
+public:
+	trie();
+	~trie();
+	void insert(string prefix, int mask,string nexthop);
+	node* search(string prefix, int hint);
+    void print_trie();
+    void print_node(node* n);
+
+private: // helpers
+
 	void printer(node* n,string sofar);
-	public:
-		trie();
-		~trie();
-		void insert(string prefix, int mask,string nexthop);
-        void print_trie();
+	unsigned int addr_to_int(string prefix);
+
+    
 };
