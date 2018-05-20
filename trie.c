@@ -7,9 +7,19 @@ trie::trie()
 
 trie::~trie()
 {
-	delete head;
+    pointer_deletion(head);  
 }
 
+void trie::pointer_deletion(node *n){
+    if(n->child[0]!= NULL){
+        pointer_deletion(n->child[0]);
+    }
+    if(n->child[1]!= NULL){
+        pointer_deletion(n->child[1]);
+    }
+    delete n;
+   
+}
 unsigned int trie::addr_to_int(string prefix)
 {
     unsigned int value =0;
@@ -112,12 +122,11 @@ void trie::printer(node* n, string sofar)
         //cout<<sofar<<"\n";
         return;
     }
-    if(n->data!=NULL){
+    if(n->data!=NULL){        
         cout<<"\t"<<sofar<<"\n";
         cout<<"\t\t"<<n->data->prefix<<"\n\t\t";
         cout<<n->data->nexthop<<"\n";
     }
-    
     printer(n->child[0],sofar+"0");
     printer(n->child[1],sofar+"1");
 }
