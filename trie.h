@@ -44,6 +44,7 @@ private: // helpers
 
 	void printer(node* n,string sofar);
 	unsigned int addr_to_int(string prefix);
+	void pointer_deletion(node *n);
 
     
 };
