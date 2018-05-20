@@ -26,12 +26,9 @@ unsigned int trie::addr_to_int(string prefix)
 
 void trie::insert(string prefix, int mask, string nexthop)
 {
-    int len = 0;
-	if(head==NULL){			//------------First insert-----------------
-		head = new node;
-        len += 1;
-    }
-
+    int len = 1;
+    if(head==NULL)		//------------First insert-----------------
+        head = new node;
     
     unsigned int value = addr_to_int(prefix);
     int sofar = 0;
@@ -76,8 +73,8 @@ trie::node* trie::search(string prefix, int hint){
     unsigned int tmp = value;
 
     int sofar = tmp >> 32 - hint;  
-    map<int, node*> prefix_table = lentable[hint];
-    map<int, node*>::iterator it;
+    unordered_map<int, node*> prefix_table = lentable[hint];
+    unordered_map<int, node*>::iterator it;
 
     it = prefix_table.find(sofar);
     if (it == prefix_table.end()){

@@ -1,5 +1,5 @@
 # include <iostream>
-# include <map>
+# include <unordered_map>
 # include <algorithm>
 # include <string>
 using namespace std;
@@ -30,7 +30,7 @@ private:
 	};
 
 	node* head;
-	map<int, node*> lentable[32];
+	unordered_map<int, node*> lentable[32];
 
 public:
 	trie();
