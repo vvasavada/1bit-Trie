@@ -26,13 +26,12 @@ for line in lines:
 
 # iterate through all of the prefixes and their next hops,
 # building up a mapping from prefix to next hop
-pref_to_nexthop = dict()
+wr = open("makeSureWorks.txt",'w')
 i = 0
-while i < range(len(lines_new)):
+while i < 100 :# range(len(lines_new)):
 	
 	# make a list of each of the fields
 	line_split = lines_new[i].split()
-	print line_split
 
 	# most of the time, the pattern is prefix line then
 	# next hop line but I think there's one off line so
@@ -46,18 +45,13 @@ while i < range(len(lines_new)):
 		i = i + 1
 		nexthop = lines_new[i].split()[0]
 
-		# add the mapping to the dictionary
-		pref_to_nexthop[pref] = nexthop
+		# and write the mapping to a new text file
+		# that can be processed ... takes the form:
+		# IP_PREFIX NEXT_HOP_ADDRESS
+		wr.write(pref+' '+nexthop+'\n')
 
 	# go to the next prefix
 	i = i + 1
-
-# and write the mapping to a new text file
-# that can be processed ... takes the form:
-# IP_PREFIX NEXT_HOP_ADDRESS
-wr = open("makeSureWorks.txt",'w')
-for p,n in pref_to_nexthop.iteritems():
-	wr.write(p+' '+n+'\n')
 
 wr.close()
 f.close()
