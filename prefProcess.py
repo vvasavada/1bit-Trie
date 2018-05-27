@@ -9,6 +9,7 @@ import urllib
 f = urllib.urlopen("http://bgp.potaroo.net/as2.0/bgptable.txt")
 s = f.read()
 
+print "past reading file"
 
 # read from the txt that I made from the webpage
 # f = open("ip.txt",'r')
@@ -26,9 +27,9 @@ for line in lines:
 
 # iterate through all of the prefixes and their next hops,
 # building up a mapping from prefix to next hop
-wr = open("makeSureWorks.txt",'w')
+wr = open("prefix_nexthop.txt",'w')
 i = 0
-while i < 100 :# range(len(lines_new)):
+while i < len(lines_new):
 	
 	# make a list of each of the fields
 	line_split = lines_new[i].split()
