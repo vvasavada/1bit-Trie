@@ -1,5 +1,8 @@
 #include "trie.h"
+#include "timer.h"
 #include <string.h>
+#include <fstream>
+
 trie::trie()
 {
 	head=NULL;
@@ -44,7 +47,6 @@ void trie::insert(string prefix, int mask, string nexthop)
     unsigned int value = addr_to_int(prefix);
     int sofar = 0;
     node* current=head;
-    cout << "mask " << mask << "\n";
     for(int i=0;i<mask;i++)
     {
         unsigned int tmp = value;
@@ -53,18 +55,14 @@ void trie::insert(string prefix, int mask, string nexthop)
         if(bit){
             if(current->child[1]==NULL){
                 current->child[1] = new node;
-                cout << "sofar " << sofar << "\n";
-                cout << "len " << len << "\n";
-                lentable[len].insert(pair<int, node*>(sofar, current->child[1]));
+                lentable[len-1].insert(pair<int, node*>(sofar, current->child[1]));
             }
             current = current->child[1];
         }
         else{
             if(current->child[0]==NULL){
                 current->child[0] = new node;
-                cout << "sofar " << sofar << "\n";
-                cout << "len " << len << "\n";
-                lentable[len].insert(pair<int, node*>(sofar, current->child[0]));
+                lentable[len-1].insert(pair<int, node*>(sofar, current->child[0]));
             }
             current = current->child[0];
         }
@@ -82,19 +80,25 @@ void trie::insert(string prefix, int mask, string nexthop)
 trie::node* trie::search(string prefix, int hint){
     int value = addr_to_int(prefix);
     unsigned int tmp = value;
+    node* current = NULL;
 
-    int sofar = tmp >> 32 - hint;  
-    unordered_map<int, node*> prefix_table = lentable[hint];
-    unordered_map<int, node*>::iterator it;
+    if (hint != 0){
+        //auto timer = Timer();
+        int sofar = tmp >> 32 - hint;  
+        unordered_map<int, node*> prefix_table = lentable[hint-1];
+        unordered_map<int, node*>::iterator it;
+        it = prefix_table.find(sofar);
+        //cout << "debug: " << timer.elapsed() << "\t";
+        if (it == prefix_table.end()){
+            return NULL;
+        }
+        current = it->second;
 
-    it = prefix_table.find(sofar);
-    if (it == prefix_table.end()){
-        cout << "match not found!" << "\n";
-        return NULL;
+    } else {
+        current = head;
     }
 
     tmp = value;
-    node* current = it->second;
     node* last_match = NULL;
 
     for (int i = hint;;i++){
@@ -147,6 +151,66 @@ void trie::print_node(node* n)
 
 int main()
 {
+    trie t;
+    ifstream prefix_file("prefix_rand_nexthop.txt");
+    string entry; 
+
+    auto timer = Timer();
+    while (getline(prefix_file, entry))
+    {
+        char* trie_entry[3];
+        int i = 0;
+        char * pch = strtok (strdup(entry.c_str()),"/ ");
+        while (pch != NULL){
+            trie_entry[i++] = pch;
+            pch = strtok(NULL, "/ ");
+        }
+
+        t.insert(trie_entry[0], atoi(trie_entry[1]), trie_entry[2]);
+    }
+    auto duration = timer.elapsed();
+
+    cout << "Trie building time: " << duration << endl;
+    prefix_file.close();
+
+    ifstream ip_file("MillionIPAddrOutput.txt");
+    int total_ips = 0;
+    while (getline(ip_file, entry))
+    {
+        // With hints
+        int num_experiments = 5;
+        int i = num_experiments;
+        double total_time = 0;
+        while (i > 0){
+            int hint = rand() % 32 + 1; // hint in range 1 to 32
+            timer = Timer();      
+            t.search(entry, hint);
+            duration = timer.elapsed();
+            total_time += duration;
+            i -= 1;
+        }
+
+        cout << total_time/num_experiments;
+
+        // Without hint
+        i = num_experiments;
+        total_time = 0;
+        while (i > 0){
+            timer = Timer();  
+            t.search(entry, 0);
+            duration = timer.elapsed();
+            //cout << "duration:" << duration << endl;
+            total_time += duration;
+            i -= 1;
+        }
+
+        cout << "," << total_time/num_experiments << endl;
+    }
+
+
+
+ /*
+
  string p1 = string("150.170.180.190");
  string p2 = string("225.192.193.192");
  string p3 = string("204.205.206.207");
@@ -170,4 +234,6 @@ int main()
 
  cout << "searching for 130.170.51.170...\n";
  t.print_node(t.search(string("130.170.51.170"), 4));
+
+ */
 }
