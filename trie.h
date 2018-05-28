@@ -5,17 +5,16 @@
 using namespace std;
 
 
-
-class trie
-{
-
-private:
-	struct prefix_data
+struct prefix_data
     {
         string nexthop;
         string prefix;
     };
+class trie
+{
 
+private:
+	
    	struct node
 	{
 		prefix_data* data;
@@ -36,9 +35,9 @@ public:
 	trie();
 	~trie();
 	void insert(string prefix, int mask,string nexthop);
-	node* search(string prefix, int hint);
+	prefix_data* search(string prefix, int hint);
     void print_trie();
-    void print_node(node* n);
+    void print_node(prefix_data* pd);
 
 private: // helpers
 

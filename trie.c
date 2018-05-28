@@ -77,7 +77,7 @@ void trie::insert(string prefix, int mask, string nexthop)
     current->data->prefix.assign(prefix);
 }
 
-trie::node* trie::search(string prefix, int hint){
+prefix_data* trie::search(string prefix, int hint){
     int value = addr_to_int(prefix);
     unsigned int tmp = value;
     node* current = NULL;
@@ -109,12 +109,12 @@ trie::node* trie::search(string prefix, int hint){
         bool bit = (tmp & ( 1 << 31-i )) >> 31-i;
         if (bit){
             if(current->child[1] == NULL){
-                return last_match;
+                return last_match==NULL? NULL:last_match->data;
             }
             current = current->child[1];
         } else {
             if(current->child[0] == NULL){
-                return last_match;
+                return last_match==NULL? NULL:last_match->data;
             }
             current = current->child[0];
         }
@@ -141,11 +141,14 @@ void trie::print_trie()
     printer(head,"");
 }
 
-void trie::print_node(node* n)
+void trie::print_node(prefix_data* pd)
 {
-    if (n != NULL) {
-        cout << n->data->prefix << "\n";
-        cout << n->data->nexthop << "\n";
+    if (pd != NULL) {
+        cout << pd->prefix << "\n";
+        cout << pd->nexthop << "\n";
+    }
+    else{
+        cout<<"Not found\n";
     }
 }
 
@@ -154,7 +157,7 @@ int main()
     trie t;
     ifstream prefix_file("prefix_rand_nexthop.txt");
     string entry; 
-
+    srand ( time(NULL) );
     auto timer = Timer();
     while (getline(prefix_file, entry))
     {
@@ -184,10 +187,11 @@ int main()
         while (i > 0){
             int hint = rand() % 32 + 1; // hint in range 1 to 32
             timer = Timer();      
-            t.search(entry, hint);
+            prefix_data* pd = t.search(entry, hint);
             duration = timer.elapsed();
             total_time += duration;
             i -= 1;
+            // t.print_node(pd);
         }
 
         cout << total_time/num_experiments;
