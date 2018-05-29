@@ -83,13 +83,13 @@ prefix_data* trie::search(string prefix, int hint){
     node* current = NULL;
 
     if (hint != 0){
-        //auto timer = Timer();
+        // auto timer = Timer();
         int sofar = tmp >> 32 - hint;  
-        unordered_map<int, node*> prefix_table = lentable[hint-1];
+        unordered_map<int, node*>* prefix_table = &lentable[hint-1];
         unordered_map<int, node*>::iterator it;
-        it = prefix_table.find(sofar);
-        //cout << "debug: " << timer.elapsed() << "\t";
-        if (it == prefix_table.end()){
+        it = prefix_table->find(sofar);
+        // cout << "debug: " << timer.elapsed() << "\t";
+        if (it == prefix_table->end()){
             return NULL;
         }
         current = it->second;
