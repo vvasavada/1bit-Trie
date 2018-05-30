@@ -29,8 +29,7 @@ private:
 	};
 
 	node* head;
-	unordered_map<int, node*> lentable[32]; 
-
+	unordered_map<int, node*>* lentable[32];
 public:
 	trie();
 	~trie();

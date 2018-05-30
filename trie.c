@@ -6,6 +6,9 @@
 trie::trie()
 {
 	head=NULL;
+    for(int i=0;i<32;i++){
+        lentable[i] = new unordered_map<int, node*>(1 << std::max(0, i-2));
+    }
 }
 
 trie::~trie()
@@ -55,14 +58,14 @@ void trie::insert(string prefix, int mask, string nexthop)
         if(bit){
             if(current->child[1]==NULL){
                 current->child[1] = new node;
-                lentable[len-1].insert(pair<int, node*>(sofar, current->child[1]));
+                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[1]));
             }
             current = current->child[1];
         }
         else{
             if(current->child[0]==NULL){
                 current->child[0] = new node;
-                lentable[len-1].insert(pair<int, node*>(sofar, current->child[0]));
+                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[0]));
             }
             current = current->child[0];
         }
@@ -85,7 +88,7 @@ prefix_data* trie::search(string prefix, int hint){
     if (hint != 0){
         // auto timer = Timer();
         int sofar = tmp >> 32 - hint;  
-        unordered_map<int, node*>* prefix_table = &lentable[hint-1];
+        unordered_map<int, node*>* prefix_table = lentable[hint-1];
         unordered_map<int, node*>::iterator it;
         it = prefix_table->find(sofar);
         // cout << "debug: " << timer.elapsed() << "\t";
@@ -93,7 +96,7 @@ prefix_data* trie::search(string prefix, int hint){
             return NULL;
         }
         current = it->second;
-
+       
     } else {
         current = head;
     }
@@ -181,34 +184,33 @@ int main()
     while (getline(ip_file, entry))
     {
         // With hints
-        int num_experiments = 5;
-        int i = num_experiments;
+        int num_experiments = 100000;
+        int repeat_experiments = 20;
         double total_time = 0;
-        while (i > 0){
-            int hint = rand() % 32 + 1; // hint in range 1 to 32
-            timer = Timer();      
-            prefix_data* pd = t.search(entry, hint);
-            duration = timer.elapsed();
-            total_time += duration;
-            i -= 1;
-            // t.print_node(pd);
-        }
+        int i, j;
 
-        cout << total_time/num_experiments;
+        timer = Timer();
+        j = repeat_experiments;
+        while (j-- > 0) {
+            i = num_experiments;
+            while (i-- > 0) {
+                t.search(entry, j);
+            }
+        }
+        total_time = timer.elapsed();
+        cout << " OUR TIME: " << total_time/(num_experiments * repeat_experiments) << endl;
 
         // Without hint
-        i = num_experiments;
-        total_time = 0;
-        while (i > 0){
-            timer = Timer();  
-            t.search(entry, 0);
-            duration = timer.elapsed();
-            //cout << "duration:" << duration << endl;
-            total_time += duration;
-            i -= 1;
+        timer = Timer();
+        j = repeat_experiments;
+        while (j-- > 0) {
+            i = num_experiments;
+            while (i-- > 0) {
+                t.search(entry, 0);
+            }
         }
-
-        cout << "," << total_time/num_experiments << endl;
+        total_time = timer.elapsed();
+        cout << "BASE TIME: " << total_time/(num_experiments * repeat_experiments) << endl;
     }
 
 
