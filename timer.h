@@ -19,8 +19,7 @@ class Timer
     }
     double elapsed() const
     {   
-        std::chrono::duration<double,std::milli> diff =
-                          std::chrono::high_resolution_clock::now() - m_time;
+        auto diff =std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_time);
         return diff.count();
     }
   private:

@@ -176,7 +176,7 @@ int main()
     }
     auto duration = timer.elapsed();
 
-    cout << "Trie building time: " << duration << endl;
+    cout << "Trie building time: " << duration/std::pow(10,6) <<" ms"<< endl;
     prefix_file.close();
 
     ifstream ip_file("MillionIPAddrOutput.txt");
@@ -198,7 +198,7 @@ int main()
             }
         }
         total_time = timer.elapsed();
-        cout << " OUR TIME: " << total_time/(num_experiments * repeat_experiments) << endl;
+        cout << " OUR TIME: " << total_time/(num_experiments * repeat_experiments) << " ns"<<endl;
 
         // Without hint
         timer = Timer();
@@ -210,7 +210,7 @@ int main()
             }
         }
         total_time = timer.elapsed();
-        cout << "BASE TIME: " << total_time/(num_experiments * repeat_experiments) << endl;
+        cout << "BASE TIME: " << total_time/(num_experiments * repeat_experiments) << " ns"<<endl;
     }
 
 
