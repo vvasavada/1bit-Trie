@@ -3,12 +3,16 @@
 #include <string.h>
 #include <fstream>
 
+void runTests(trie& t);
+void runExperiment(string ip, double arr[], const int hintLength,
+                        trie& t, const int numSearches);
+
 trie::trie()
 {
 	head=NULL;
-    for(int i=0;i<32;i++){
-        lentable[i] = new unordered_map<int, node*>(1 << std::max(0, i-2));
-    }
+    // for(int i=0;i<32;i++){
+    //     lentable[i] = new unordered_map<int, node*>(1 << std::max(0, i-2));
+    // }
 }
 
 trie::~trie()
@@ -58,14 +62,14 @@ void trie::insert(string prefix, int mask, string nexthop)
         if(bit){
             if(current->child[1]==NULL){
                 current->child[1] = new node;
-                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[1]));
+                lentable[len-1].insert(pair<int, node*>(sofar, current->child[1]));
             }
             current = current->child[1];
         }
         else{
             if(current->child[0]==NULL){
                 current->child[0] = new node;
-                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[0]));
+                lentable[len-1].insert(pair<int, node*>(sofar, current->child[0]));
             }
             current = current->child[0];
         }
@@ -81,6 +85,10 @@ void trie::insert(string prefix, int mask, string nexthop)
 }
 
 prefix_data* trie::search(string prefix, int hint){
+    if (hint == 19) {
+        cout << "nineteenth" << endl;
+    }
+
     int value = addr_to_int(prefix);
     unsigned int tmp = value;
     node* current = NULL;
@@ -88,7 +96,7 @@ prefix_data* trie::search(string prefix, int hint){
     if (hint != 0){
         // auto timer = Timer();
         int sofar = tmp >> 32 - hint;  
-        unordered_map<int, node*>* prefix_table = lentable[hint-1];
+        unordered_map<int, node*>* prefix_table = &lentable[hint-1];
         unordered_map<int, node*>::iterator it;
         it = prefix_table->find(sofar);
         // cout << "debug: " << timer.elapsed() << "\t";
@@ -179,39 +187,41 @@ int main()
     cout << "Trie building time: " << duration/std::pow(10,6) <<" ms"<< endl;
     prefix_file.close();
 
-    ifstream ip_file("MillionIPAddrOutput.txt");
-    int total_ips = 0;
-    while (getline(ip_file, entry))
-    {
-        // With hints
-        int num_experiments = 100000;
-        int repeat_experiments = 20;
-        double total_time = 0;
-        int i, j;
+    runTests(t);
 
-        timer = Timer();
-        j = repeat_experiments;
-        while (j-- > 0) {
-            i = num_experiments;
-            while (i-- > 0) {
-                t.search(entry, j);
-            }
-        }
-        total_time = timer.elapsed();
-        cout << " OUR TIME: " << total_time/(num_experiments * repeat_experiments) << " ns"<<endl;
+    // ifstream ip_file("MillionIPAddrOutput.txt");
+    // int total_ips = 0;
+    // while (getline(ip_file, entry))
+    // {
+    //     // With hints
+    //     int num_experiments = 100000;
+    //     int repeat_experiments = 20;
+    //     double total_time = 0;
+    //     int i, j;
 
-        // Without hint
-        timer = Timer();
-        j = repeat_experiments;
-        while (j-- > 0) {
-            i = num_experiments;
-            while (i-- > 0) {
-                t.search(entry, 0);
-            }
-        }
-        total_time = timer.elapsed();
-        cout << "BASE TIME: " << total_time/(num_experiments * repeat_experiments) << " ns"<<endl;
-    }
+    //     timer = Timer();
+    //     j = repeat_experiments;
+    //     while (j-- > 0) {
+    //         i = num_experiments;
+    //         while (i-- > 0) {
+    //             t.search(entry, j);
+    //         }
+    //     }
+    //     total_time = timer.elapsed();
+    //     cout << " OUR TIME: " << total_time/(num_experiments * repeat_experiments) << " ns"<<endl;
+
+    //     // Without hint
+    //     timer = Timer();
+    //     j = repeat_experiments;
+    //     while (j-- > 0) {
+    //         i = num_experiments;
+    //         while (i-- > 0) {
+    //             t.search(entry, 0);
+    //         }
+    //     }
+    //     total_time = timer.elapsed();
+    //     cout << "BASE TIME: " << total_time/(num_experiments * repeat_experiments) << " ns"<<endl;
+    // }
 
 
 
@@ -242,4 +252,103 @@ int main()
  t.print_node(t.search(string("130.170.51.170"), 4));
 
  */
+}
+
+
+void runTests(trie& t) {
+
+    // read in some addresses from this file
+    ifstream ip_file("MillionIPAddrOutput.txt");
+    string ip;
+
+    // goal is to get the time it takes to find an ip address:
+    //      1) successfully with hints
+    //      2) successfully without hints
+    //      3) unsuccessfully with hints
+    //      4) unsuccessfully without hints
+
+    // write everything to a csv for processing in python
+    ofstream successResults;
+    successResults.open("successResults.csv");
+
+    ofstream failResults;
+    failResults.open("failResults.csv");
+
+    successResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint" <<
+        "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint" <<
+        "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
+
+    failResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint" <<
+        "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint" <<
+        "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
+
+    while (getline(ip_file, ip)) {
+        const int numSearches = 2000000;
+
+        // element 0 of this array is the time it took
+        // to search for an ip address in the trie 20,000,000
+        // times with a hint length of 0 .... and so on for
+        // all hint lengths up to 24
+
+        // search isn't successful
+        if (t.search(ip, 0) != nullptr) {
+            double fail[25];
+
+            // run the experiment 20,000,000 times
+            // for each length hint (0 to 24)
+            for (int i = 0; i <= 24; ++i) {
+                runExperiment(ip, fail, i,
+                    t, numSearches);
+            }
+
+            cout << "writing to failResults\n";
+            // write results to file
+            for (int i = 0; i <= 24; ++i) {
+                failResults << fail[i];
+                if (i != 24) {
+                    failResults << ',';
+                }
+            }
+            failResults << '\n';
+        }
+
+        // search is successful
+        else {
+            double succeed[25];
+
+            // run the experiment 20,000,000 times
+            // for each length hint (0 to 24)
+            for (int i = 0; i <= 24; ++i) {
+                runExperiment(ip, succeed, i,
+                    t, numSearches);
+            }
+
+            cout << "writing to successResults\n";
+            // write results to file
+            for (int i = 0; i <= 24; ++i) {
+                successResults << succeed[i];
+                if (i != 24) {
+                    successResults << ',';
+                }
+            }
+            successResults << '\n';
+        }
+    }
+
+    ip_file.close();
+    successResults.close();
+    failResults.close();
+}
+
+void runExperiment(string ip, double arr[], const int hintLength,
+                        trie& t, const int numSearches) {
+    cout << "\trunning experiment on " << hintLength << endl;
+    // start a timer, run the experiment 20,000,000 times
+    // and set the value of the array corresponding to that
+    // hint to the value you get
+    Timer timer;
+    for (int i = 0; i < numSearches; ++i) {
+        t.search(ip, hintLength);
+    }
+    arr[hintLength] = timer.elapsed() / numSearches;
 }
