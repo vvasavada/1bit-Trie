@@ -271,12 +271,12 @@ void runTests(trie& t) {
     ofstream failResults;
     failResults.open("failResults.csv");
 
-    successResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint" <<
-        "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint" <<
+    successResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint," <<
+        "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint," <<
         "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
 
-    failResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint" <<
-        "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint" <<
+    failResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint," <<
+        "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint," <<
         "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
 
     const int numSearches = 100000;
