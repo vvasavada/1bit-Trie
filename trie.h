@@ -18,13 +18,13 @@ private:
    	struct node
 	{
 		prefix_data* data;
-		node* child[1];
+		node* child[2];
 
 		node()
 		{
-			data = NULL;
-			child[0]=NULL;
-			child[1]=NULL; 
+			data = nullptr;
+			child[0] = nullptr;
+			child[1] = nullptr; 
 		}
 	};
 

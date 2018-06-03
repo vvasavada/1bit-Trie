@@ -85,9 +85,6 @@ void trie::insert(string prefix, int mask, string nexthop)
 }
 
 prefix_data* trie::search(string prefix, int hint){
-    if (hint == 19) {
-        cout << "nineteenth" << endl;
-    }
 
     int value = addr_to_int(prefix);
     unsigned int tmp = value;
@@ -184,7 +181,7 @@ int main()
     }
     auto duration = timer.elapsed();
 
-    cout << "Trie building time: " << duration/std::pow(10,6) <<" ms"<< endl;
+    // cout << "Trie building time: " << duration/std::pow(10,6) <<" ms"<< endl;
     prefix_file.close();
 
     runTests(t);
@@ -282,8 +279,16 @@ void runTests(trie& t) {
         "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint" <<
         "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
 
+    const int numSearches = 100000;
+
+    int numSucceed = 1000;
+    int numFailed = 1000;
+
     while (getline(ip_file, ip)) {
-        const int numSearches = 2000000;
+
+        if (numSucceed == 0 && numFailed == 0) {
+            break;
+        }
 
         // element 0 of this array is the time it took
         // to search for an ip address in the trie 20,000,000
@@ -291,29 +296,32 @@ void runTests(trie& t) {
         // all hint lengths up to 24
 
         // search isn't successful
-        if (t.search(ip, 0) != nullptr) {
-            double fail[25];
+        if (t.search(ip, 0) == nullptr && numFailed > 0) {
+            numFailed--;
+            cout << "skipping fail num " << numFailed << endl;
+            // double fail[25];
 
-            // run the experiment 20,000,000 times
-            // for each length hint (0 to 24)
-            for (int i = 0; i <= 24; ++i) {
-                runExperiment(ip, fail, i,
-                    t, numSearches);
-            }
+            // // run the experiment 20,000,000 times
+            // // for each length hint (0 to 24)
+            // for (int i = 0; i <= 24; ++i) {
+            //     runExperiment(ip, fail, i,
+            //         t, numSearches);
+            // }
 
-            cout << "writing to failResults\n";
-            // write results to file
-            for (int i = 0; i <= 24; ++i) {
-                failResults << fail[i];
-                if (i != 24) {
-                    failResults << ',';
-                }
-            }
-            failResults << '\n';
+            // cout << "writing to " << numFailed << " failResults\n";
+            // // write results to file
+            // for (int i = 0; i <= 24; ++i) {
+            //     failResults << fail[i];
+            //     if (i != 24) {
+            //         failResults << ',';
+            //     }
+            // }
+            // failResults << '\n';
         }
 
         // search is successful
-        else {
+        else if (numSucceed > 0) {
+            numSucceed--;
             double succeed[25];
 
             // run the experiment 20,000,000 times
@@ -323,7 +331,7 @@ void runTests(trie& t) {
                     t, numSearches);
             }
 
-            cout << "writing to successResults\n";
+            cout << "writing to " << numSucceed <<" successResults\n";
             // write results to file
             for (int i = 0; i <= 24; ++i) {
                 successResults << succeed[i];
@@ -342,8 +350,8 @@ void runTests(trie& t) {
 
 void runExperiment(string ip, double arr[], const int hintLength,
                         trie& t, const int numSearches) {
-    cout << "\trunning experiment on " << hintLength << endl;
-    // start a timer, run the experiment 20,000,000 times
+    // cout << "\trunning experiment on " << hintLength << endl;
+    // start a timer, run the experiment 100,000 times
     // and set the value of the array corresponding to that
     // hint to the value you get
     Timer timer;
