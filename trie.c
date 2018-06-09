@@ -10,9 +10,12 @@ void runExperiment(string ip, double arr[], const int hintLength,
 trie::trie()
 {
 	head=NULL;
-    // for(int i=0;i<32;i++){
-    //     lentable[i] = new unordered_map<int, node*>(1 << std::max(0, i-2));
-    // }
+    for(int i=0;i<32;i++){
+         lentable[i] = new unordered_map<int, node*>(1 << std::max(0, i-2));
+	  lentable[i]->max_load_factor(0.2);    
+ }
+ 
+	
 }
 
 trie::~trie()
@@ -62,14 +65,14 @@ void trie::insert(string prefix, int mask, string nexthop)
         if(bit){
             if(current->child[1]==NULL){
                 current->child[1] = new node;
-                lentable[len-1].insert(pair<int, node*>(sofar, current->child[1]));
+                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[1]));
             }
             current = current->child[1];
         }
         else{
             if(current->child[0]==NULL){
                 current->child[0] = new node;
-                lentable[len-1].insert(pair<int, node*>(sofar, current->child[0]));
+                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[0]));
             }
             current = current->child[0];
         }
@@ -93,7 +96,7 @@ prefix_data* trie::search(string prefix, int hint){
     if (hint != 0){
         // auto timer = Timer();
         int sofar = tmp >> 32 - hint;  
-        unordered_map<int, node*>* prefix_table = &lentable[hint-1];
+        unordered_map<int, node*>* prefix_table = lentable[hint-1];
         unordered_map<int, node*>::iterator it;
         it = prefix_table->find(sofar);
         // cout << "debug: " << timer.elapsed() << "\t";
@@ -266,22 +269,22 @@ void runTests(trie& t) {
 
     // write everything to a csv for processing in python
     ofstream successResults;
-    successResults.open("successResults.csv");
+    successResults.open("successResults_0.2.csv");
 
-    ofstream failResults;
-    failResults.open("failResults.csv");
+    //ofstream failResults;
+    //failResults.open("failResults.csv");
 
     successResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint," <<
         "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint," <<
         "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
 
-    failResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint," <<
-        "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint," <<
-        "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
+//    failResults << "0_hint,1_hint,2_hint,3_hint,4_hint,5_hint,6_hint," <<
+  //      "7_hint,8_hint,9_hint,10_hint,11_hint,12_hint,13_hint,14_hint,15_hint," <<
+    //    "16_hint,17_hint,18_hint,19_hint,20_hint,21_hint,22_hint,23_hint,24_hint\n";
 
     const int numSearches = 100000;
 
-    int numSucceed = 1000;
+    int numSucceed = 100;
     int numFailed = 1000;
 
     while (getline(ip_file, ip)) {
@@ -296,9 +299,9 @@ void runTests(trie& t) {
         // all hint lengths up to 24
 
         // search isn't successful
-        if (t.search(ip, 0) == nullptr && numFailed > 0) {
+        if (t.search(ip, 24) == nullptr && numFailed > 0) {
             numFailed--;
-            cout << "skipping fail num " << numFailed << endl;
+            //cout << "skipping fail num " << numFailed << endl;
             // double fail[25];
 
             // // run the experiment 20,000,000 times
@@ -345,7 +348,7 @@ void runTests(trie& t) {
 
     ip_file.close();
     successResults.close();
-    failResults.close();
+   // failResults.close();
 }
 
 void runExperiment(string ip, double arr[], const int hintLength,

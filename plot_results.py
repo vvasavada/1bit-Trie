@@ -1,6 +1,12 @@
 import csv
 import matplotlib.pyplot as plt
 
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("infile", type=str, help="CSV FILE")
+args = parser.parse_args()
+csv_file = args.infile
 success_averages = [0] * 25
 fail_averages = [0] * 25
 
@@ -9,7 +15,7 @@ fail_averages = [0] * 25
 def runAve(last, val, numVals):
 	return last + ((val - last) / numVals)
 
-with open('successResults_new.csv','r') as f:
+with open(csv_file,'r') as f:
 	reader = csv.reader(f)
 
 	# skip first row, the text
