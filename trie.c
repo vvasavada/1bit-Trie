@@ -11,8 +11,8 @@ trie::trie()
 {
 	head=NULL;
     for(int i=0;i<32;i++){
-         lentable[i] = new unordered_map<int, node*>(1 << std::max(0, i-2));
-	  lentable[i]->max_load_factor(0.2);    
+      // lentable[i] = new unordered_map<int, node*>(1 << std::max(0, i-2));
+	  lentable[i].max_load_factor(0.2);    
  }
  
 	
@@ -33,6 +33,7 @@ void trie::pointer_deletion(node *n){
     delete n;
    
 }
+
 unsigned int trie::addr_to_int(string prefix)
 {
     unsigned int value =0;
@@ -55,6 +56,9 @@ void trie::insert(string prefix, int mask, string nexthop)
         head = new node;
 
     unsigned int value = addr_to_int(prefix);
+
+    // cout << prefix << " " << value << endl;
+
     int sofar = 0;
     node* current=head;
     for(int i=0;i<mask;i++)
@@ -65,14 +69,14 @@ void trie::insert(string prefix, int mask, string nexthop)
         if(bit){
             if(current->child[1]==NULL){
                 current->child[1] = new node;
-                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[1]));
+                lentable[len-1].insert(pair<int, node*>(sofar, current->child[1]));
             }
             current = current->child[1];
         }
         else{
             if(current->child[0]==NULL){
                 current->child[0] = new node;
-                lentable[len-1]->insert(pair<int, node*>(sofar, current->child[0]));
+                lentable[len-1].insert(pair<int, node*>(sofar, current->child[0]));
             }
             current = current->child[0];
         }
@@ -96,7 +100,7 @@ prefix_data* trie::search(string prefix, int hint){
     if (hint != 0){
         // auto timer = Timer();
         int sofar = tmp >> 32 - hint;  
-        unordered_map<int, node*>* prefix_table = lentable[hint-1];
+        unordered_map<int, node*>* prefix_table = &lentable[hint-1];
         unordered_map<int, node*>::iterator it;
         it = prefix_table->find(sofar);
         // cout << "debug: " << timer.elapsed() << "\t";
@@ -269,7 +273,7 @@ void runTests(trie& t) {
 
     // write everything to a csv for processing in python
     ofstream successResults;
-    successResults.open("successResults_0.2.csv");
+    successResults.open("successResults_point2.csv");
 
     //ofstream failResults;
     //failResults.open("failResults.csv");
@@ -284,7 +288,7 @@ void runTests(trie& t) {
 
     const int numSearches = 100000;
 
-    int numSucceed = 100;
+    int numSucceed = 500;
     int numFailed = 1000;
 
     while (getline(ip_file, ip)) {
